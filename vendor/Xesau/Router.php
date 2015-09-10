@@ -31,7 +31,6 @@ class Router
      */
     public function route($method, $regex, callable $handler)
     {
-        var_dump(is_callable($handler));
         if (!is_array($method)) {
             if ($method == '*')
                 foreach ($this->routes as &$collection)

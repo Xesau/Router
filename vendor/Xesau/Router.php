@@ -2,11 +2,12 @@
 
 namespace Xesau;
 
+use ReflectionFunction;
+
 /**
  * A simple regex->callback based router that is easy in use
  *
  * @author Xesau
- * @version 1.0
  */
 class Router
 {
@@ -29,7 +30,7 @@ class Router
      * @param string|string[] $method  The method(s) this route will react to
      * @param callable        $handler The handler
      */
-    public function route($method, $regex, callable $handler)
+    public function route($method, $regex, $handler)
     {
         if (!is_array($method)) {
             if ($method == '*')
@@ -50,7 +51,7 @@ class Router
      * @param string $regex    The path, allowing regex
      * @param string $callable The handler
      */
-    public function get($regex, callable $handler)
+    public function get($regex, $handler)
     {
         $this->routes['GET'][$regex] = $handler;
         return $this;
@@ -62,7 +63,7 @@ class Router
      * @param string $regex    The path, allowing regex
      * @param string $callable The handler
      */
-    public function post($regex, callable $handler)
+    public function post($regex, $handler)
     {
         $this->routes['POST'][$regex] = $handler;
         return $this;
@@ -74,7 +75,7 @@ class Router
      * @param string $regex    The path, allowing regex
      * @param string $callable The handler
      */
-    public function put($regex, callable $handler)
+    public function put($regex, $handler)
     {
         $this->routes['PUT'][$regex] = $handler;
         return $this;
@@ -86,7 +87,7 @@ class Router
      * @param string $regex    The path, allowing regex
      * @param string $callable The handler
      */
-    public function head($regex, callable $handler)
+    public function head($regex, $handler)
     {
         $this->routes['HEAD'][$regex] = $handler;
         return $this;
@@ -98,7 +99,7 @@ class Router
      * @param string $regex    The path, allowing regex
      * @param string $callable The handler
      */
-    public function delete($regex, callable $handler)
+    public function delete($regex, $handler)
     {
         $this->routes['DELETE'][$regex] = $handler;
         return $this;

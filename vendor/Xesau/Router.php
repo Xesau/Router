@@ -2,8 +2,6 @@
 
 namespace Xesau;
 
-use ReflectionFunction;
-
 /**
  * A simple regex->callback based router that is easy in use
  *
@@ -128,10 +126,14 @@ class Router
 
                     // Prevent @ collision
                     $regex = str_replace('@', '\\@', $regex);
-                    $params = array();
 
                     // If the path matches the pattern
-                    if (preg_match('@' . $regex . '@', $path, $params)) {
+                    if (preg_match('@^' . $regex . '$@', $path, $params)) {
+                        // Fix . namespace separator notation
+                        if (is_array($callback) && isset($callback[0]) && isset($callback[1])) {
+                            $callback[0] = str_replace('.', '\\', $callback[0]);
+                        }
+
                         // Pass the params to the callback, without the full url
                         array_shift($params);
                         return call_user_func_array($callback, $params);

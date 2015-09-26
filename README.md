@@ -1,11 +1,16 @@
 # Xesau\Router
-Xesau\Router is a one-file PHP router.
+Xesau\Router is a one-file-one-class PHP router, suitable for web applications and ReST-ful APIs.
+It's efficient and fast, because it doesn't evaluate the `callable`s when you add the routes, but when you execute the router.
 
 ## How to use
 
     <?php
     
+    // If you have some sort of autoloader
     require_once 'vendor/Autoload.php';
+    
+    // If you don't have an autoloader
+    require_once 'vendor/Xesau/Router.php';
     
     use Xesau\Router;
     

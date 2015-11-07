@@ -25,7 +25,7 @@ It's efficient and fast, because it doesn't evaluate the `callable`s when you ad
      
     $router->get('/page/(.*)', ['PageController', 'viewPage']);
      
-    $router->dispatchGlobals();
+    $router->dispatchGlobal();
      
     ?>
 

@@ -133,6 +133,9 @@ class Router
                         if (is_array($callback) && isset($callback[0]) && isset($callback[1])) {
                             $callback[0] = str_replace('.', '\\', $callback[0]);
                         }
+                        if (is_string($callback)) {
+                            $callback = str_replace('.', '\\', $callback);
+                        }
 
                         // Pass the params to the callback, without the full url
                         array_shift($params);

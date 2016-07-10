@@ -17,7 +17,7 @@ class Router
     private $routes = array('GET' => array(), 'POST' => array(), 'HEAD' => array(), 'PUT' => array(), 'DELETE' => array());
     private $error;
 
-    public function __construct(callable $error)
+    public function __construct($error)
     {
         $this->error = $error;
     }
@@ -146,8 +146,7 @@ class Router
         }
 
         // Nothing found --> error handler
-        $h = $this->error;
-        return $h($method, $path);
+        return call_user_func($this->error, [$method, $path]);
     }
 
     /**

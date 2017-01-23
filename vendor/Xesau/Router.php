@@ -187,10 +187,15 @@ class Router
         } else {
             // Loop over all given routes
             foreach ($this->routes[$method] as $regex => $callback) {
-                if (strlen($regex) > 0) {
+                $len = strlen($regex);
+                if ($len > 0) {
                     // Fix missing begin-/
                     if ($regex[0] != '/')
                         $regex = '/' . $regex;
+                    
+                    // Fix trailing /
+                    if ($len > 1 && $regex[$len - 1] == '/')
+                        $regex = substr($regex, 0, -1);
 
                     // Prevent @ collision
                     $regex = str_replace('@', '\\@', $regex);

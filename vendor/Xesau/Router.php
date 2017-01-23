@@ -160,14 +160,14 @@ class Router
                     if (preg_match('@^' . $regex . '$@', $path, $params)) {
                         // Pass the params to the callback, without the full url
                         array_shift($params);
-                        return self::call($callback, $params);
+                        return $this->call($callback, $params);
                     }
                 }
             }
         }
 
         // Nothing found --> error handler
-        return self::call($this->error, [$method, $path]);
+        return $this->call($this->error, [$method, $path]);
     }
 	
 	private function call($callable, array $params = []) {

@@ -18,13 +18,13 @@ class Router
      */
     private $routes;
     private $error;
-	private $baseNamespace;
+    private $baseNamespace;
 
     public function __construct($error, $baseNamespace = '')
     {
-		$this->routes = [];
+        $this->routes = [];
         $this->error = $error;
-		$this->baseNamespace = $baseNamespace == '' ? '' : $baseNamespace.'\\';
+        $this->baseNamespace = $baseNamespace == '' ? '' : $baseNamespace.'\\';
     }
 
     /**
@@ -37,8 +37,8 @@ class Router
     {
         if (!is_array($method)) {
             if ($method == '*')
-                foreach ($this->routes as &$collection)
-                    $collection[$regex] = $handler;
+                foreach (['GET', 'PUT', 'DELETE', 'OPTIONS', 'TRACE', 'POST', 'HEAD'] as $method)
+                    $this->routes[$method][$regex] = $handler;
             else
                 $this->routes[strtoupper($method)][$regex] = $handler;
         } else {
@@ -105,6 +105,30 @@ class Router
     public function delete($regex, $handler)
     {
         $this->routes['DELETE'][$regex] = $handler;
+        return $this;
+    }
+    
+    /**
+     * Adds a route to the DELETE route collection
+     *
+     * @param string $regex    The path, allowing regex
+     * @param string $callable The handler
+     */
+    public function options($regex, $handler)
+    {
+        $this->routes['options'][$regex] = $handler;
+        return $this;
+    }
+
+    /**
+     * Adds a route to the DELETE route collection
+     *
+     * @param string $regex    The path, allowing regex
+     * @param string $callable The handler
+     */
+    public function trace($regex, $handler)
+    {
+        $this->routes['trace'][$regex] = $handler;
         return $this;
     }
 

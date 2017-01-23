@@ -2,6 +2,8 @@
 
 namespace Xesau;
 
+use InvalidArgumentException;
+
 /**
  * A simple regex->callback based router that is easy in use
  *
@@ -14,12 +16,15 @@ class Router
      * @var array[][] $routes The defined routes
      * @var callback  $error  The error handler, invoked as ($method, $path)
      */
-    private $routes = array('GET' => array(), 'POST' => array(), 'HEAD' => array(), 'PUT' => array(), 'DELETE' => array());
+    private $routes;
     private $error;
+	private $baseNamespace;
 
-    public function __construct($error)
+    public function __construct($error, $baseNamespace = '')
     {
+		$this->routes = [];
         $this->error = $error;
+		$this->baseNamespace = $baseNamespace == '' ? '' : $baseNamespace.'\\';
     }
 
     /**
@@ -113,7 +118,7 @@ class Router
     public function dispatch($method, $path)
     {
         // If there are no routes for that method, just error immediately
-        if (!isset($this->routes[$method]) || !count($this->routes[$method])) {
+        if (!isset($this->routes[$method])) {
             $h = $this->error;
             return $h($method, $path);
         } else {
@@ -129,25 +134,43 @@ class Router
 
                     // If the path matches the pattern
                     if (preg_match('@^' . $regex . '$@', $path, $params)) {
-                        // Fix . namespace separator notation
-                        if (is_array($callback) && isset($callback[0]) && isset($callback[1])) {
-                            $callback[0] = str_replace('.', '\\', $callback[0]);
-                        }
-                        if (is_string($callback)) {
-                            $callback = str_replace('.', '\\', $callback);
-                        }
-
                         // Pass the params to the callback, without the full url
                         array_shift($params);
-                        return call_user_func_array($callback, $params);
+                        return self::call($callback, $params);
                     }
                 }
             }
         }
 
         // Nothing found --> error handler
-        return call_user_func($this->error, [$method, $path]);
+        return self::call($this->error, [$method, $path]);
     }
+	
+	private function call($callable, array $params = []) {
+		if (is_string($callable)) {
+			if (strlen($callable) > 0) {
+				if ($callable[0] == '@') {
+					$callable = $this->baseNamespace . substr($callable, 1);
+				}
+			} else {
+				throw new InvalidArgumentException('Route/error callable as string must not be empty.');
+			}
+			$callable = str_replace('.', '\\', $callable);
+		}
+		if (is_array($callable)) {
+			if (count($callable) !== 2)
+				throw new InvalidArgumentException('Route/error callable as array must contain and contain only two strings.');
+			if (strlen($callable[0]) > 0) {
+				if ($callable[0][0] == '@') {
+					$callable[0] = $this->baseNamespace . substr($callable[0], 1);
+				}
+			} else {
+				throw new InvalidArgumentException('Route/error callable as array must contain and contain only two strings.');
+			}
+			$callable[0] = str_replace('.', '\\', $callable[0]);
+		}
+		return call_user_func_array($callable, $params);
+	}
 
     /**
      * Dispatches the router using data from the $_SERVER global

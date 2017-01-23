@@ -17,11 +17,13 @@ class Router
      * @var callback  $error         The error handler, invoked as ($method, $path)
      * @var string    $baseNamespace The base namespace
      * @var string    $currentPrefix The current route prefix
+     * @var mixed     $services      Application-wide service 
      */
     private $routes;
     private $error;
     private $baseNamespace;
     private $currentPrefix;
+    private $service;
     
     /**
      * Initiates the router and sets some default values
@@ -37,6 +39,24 @@ class Router
         $this->currentPrefix = '';
     }
 
+    /**
+     * Sets a service object, which will be passed as first parameter to every call.
+     *
+     * @param mixed $service The service
+     */
+    public function setService($service) {
+        $this->service = $service;
+    }
+    
+    /**
+     * Gets the currently set service
+     *
+     * @return mixed|null The service, or null if none is set.
+     */
+    public function getService($service) {
+        return $this->service;
+    }
+    
     /**
      * Adds a route to the specified collection
      *
@@ -65,12 +85,24 @@ class Router
      *
      * @param string $prefix The prefix
      * @param callable $routes callable(Router) wherein the mounted routes be added
+     * @param mixed|mixed[]|false Custom service(s) for this route group
      */
-    public function mount($prefix, callable $routes) {
-        $previous = $this->currentPrefix;
+    public function mount($prefix, callable $routes, $service = false) {
+        // Save current prefix and service
+        $previousPrefix = $this->currentPrefix;
+        if ($service !== false)
+            $previousService = $this->service;
+        
         $this->currentPrefix = $prefix;
+        $this->service = $service;
+        
+        // Add the routes
         $routes($this);
-        $this->currentPrefix = $previous;
+        
+        // Restore old prefix and service
+        $this->currentPrefix = $previousPrefix;
+        if ($service !== false)
+            $this->serivce = $previousService;
         
         return $this;
     }
@@ -244,7 +276,13 @@ class Router
             }
             $callable[0] = str_replace('.', '\\', $callable[0]);
         }
-        return call_user_func_array($callable, $params);
+        
+        // Call the callable
+        if (null !== $this->service) {
+            return call_user_func_array($callable, array_merge((array)$this->service, $params));
+        } else {
+            return call_user_func_array($callable, $params);
+        }
     }
 
     /**

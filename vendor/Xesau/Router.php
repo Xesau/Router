@@ -77,7 +77,7 @@ class Router
     }
     
     private function addRoute($method, $regex, $handler) {
-        $this->routes[strtoupper($method)][$this->currentPrefix . $regex] = $handler;
+        $this->routes[strtoupper($method)][$this->currentPrefix . $regex] = [$handler, $this->service];
     }
 
     /**
@@ -101,9 +101,9 @@ class Router
         
         // Restore old prefix and service
         $this->currentPrefix = $previousPrefix;
-        if ($service !== false)
+        if ($service !== false) {
             $this->serivce = $previousService;
-        
+        }
         return $this;
     }
     
@@ -218,9 +218,13 @@ class Router
             return $h($method, $path);
         } else {
             // Loop over all given routes
-            foreach ($this->routes[$method] as $regex => $callback) {
+            foreach ($this->routes[$method] as $regex => $route) {
                 $len = strlen($regex);
                 if ($len > 0) {
+					// Get route 
+					$callback = $route[0];
+					$service = isset($route[1]) ? $route[1] : [];
+					
                     // Fix missing begin-/
                     if ($regex[0] != '/')
                         $regex = '/' . $regex;
@@ -236,7 +240,7 @@ class Router
                     if (preg_match('@^' . $regex . '$@', $path, $params)) {
                         // Pass the params to the callback, without the full url
                         array_shift($params);
-                        return $this->call($callback, $params);
+                        return $this->call($callback, array_merge($service, $params));
                     }
                 }
             }
@@ -278,11 +282,7 @@ class Router
         }
         
         // Call the callable
-        if (null !== $this->service) {
-            return call_user_func_array($callable, array_merge((array)$this->service, $params));
-        } else {
-            return call_user_func_array($callable, $params);
-        }
+		return call_user_func_array($callable, $params);
     }
 
     /**

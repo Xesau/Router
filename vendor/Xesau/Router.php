@@ -90,11 +90,11 @@ class Router
     public function mount($prefix, callable $routes, $service = false) {
         // Save current prefix and service
         $previousPrefix = $this->currentPrefix;
-        if ($service !== false)
-            $previousService = $this->service;
-        
         $this->currentPrefix = $prefix;
-        $this->service = $service;
+        if ($service !== false){ 
+            $previousService = $this->service;
+            $this->service = $service;
+        }
         
         // Add the routes
         $routes($this);

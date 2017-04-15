@@ -102,7 +102,7 @@ class Router
         // Restore old prefix and service
         $this->currentPrefix = $previousPrefix;
         if ($service !== false) {
-            $this->serivce = $previousService;
+            $this->service = $previousService;
         }
         return $this;
     }

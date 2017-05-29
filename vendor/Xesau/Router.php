@@ -2,6 +2,7 @@
 
 namespace Xesau;
 
+use Exception;
 use InvalidArgumentException;
 
 /**
@@ -214,8 +215,7 @@ class Router
     {
         // If there are no routes for that method, just error immediately
         if (!isset($this->routes[$method])) {
-            $h = $this->error;
-            return $h($method, $path);
+            return $this->call($this->error, [$method, $path, 404]);
         } else {
             // Loop over all given routes
             foreach ($this->routes[$method] as $regex => $route) {
@@ -240,14 +240,18 @@ class Router
                     if (preg_match('@^' . $regex . '$@', $path, $params)) {
                         // Pass the params to the callback, without the full url
                         array_shift($params);
-                        return $this->call($callback, array_merge($service, $params));
+                        try {
+                            return $this->call($callback, array_merge($service, $params));
+                        } catch (HttpRequestException $ex) {
+                            return $this->call($this->error, [$method, $path, $ex->getCode()]);
+                        }
                     }
                 }
             }
         }
 
         // Nothing found --> error handler
-        return $this->call($this->error, [$method, $path]);
+        return $this->call($this->error, [$method, $path, 404]);
     }
     
     /**
@@ -306,3 +310,8 @@ class Router
     }
 
 }
+
+class HttpRequestException extends Exception {
+
+}
+

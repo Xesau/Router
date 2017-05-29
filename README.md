@@ -1,6 +1,6 @@
 # Xesau\Router
-Xesau\Router is a one-file-one-class PHP router, suitable for web applications and ReST-ful APIs.
-It's efficient and fast, because it doesn't evaluate the `callable`s when you add the routes, but when you execute the router.
+Xesau\Router is a one-file PHP router, suitable for web applications and RESTful APIs.
+It's efficient and fast, in part because it doesn't evaluate the `callable`s the moment you add the route, but only when that route is executed.
 
 ## How to use
 ```php
@@ -13,8 +13,8 @@ require_once 'vendor/Xesau/Router.php';
 
 use Xesau\Router;
 
-$router = new Router(function () {
-    // 404 error handler
+$router = new Router(function ($method, $path, $statusCode) {
+    http_response_code($statusCode);
     include 'views/error.html';
 }); 
 
@@ -48,7 +48,7 @@ $router = new Xesau\Router('Xesau\\Website\\Controller\\ErrorPages::notFound');
 $router->get('/articles/([0-9]+)/comments', 'Xesau\\Website\\Controller\\News\\Comments::load');
 $router->post('/articles/([0-9]+)/comments/reply', 'Xesau\\Website\\Controller\\News\\Comments::reply');
 $router->post('/articles/([0-9]+)/comments/delete/([0-9]+)', 'Xesau\\Website\\Controller\\News\\Comments::delete');
-$router->edit('/articles/([0-9]+)/comments/edit/([0-9]+)', 'Xesau\\Website\\Controller\\News\\Comments::delete');
+$router->edit('/articles/([0-9]+)/comments/edit/([0-9]+)', 'Xesau\\Website\\Controller\\News\\Comments::edit');
 ```
 Long strings with `\\` separating every few words. It's hard to read, and the namespace is the same for every callback. However, there is an easier way to write those callbacks, if you pass a second 'baseNamespace' parameter to the constructor
 ```php
@@ -60,6 +60,6 @@ $router = new Xesau\Router('@ErrorPages::notFound', 'Xesau.Website.Controller');
 $router->get('/articles/([0-9]+)/comments', '@News.Comments::load');
 $router->post('/articles/([0-9]+)/comments/reply', '@News.Comments::reply');
 $router->post('/articles/([0-9]+)/comments/delete/([0-9]+)', '@News.Comments::delete');
-$router->edit('/articles/([0-9]+)/comments/edit/([0-9]+)', '@News.Comments::delete');
+$router->edit('/articles/([0-9]+)/comments/edit/([0-9]+)', '@News.Comments::edit');
 ```
 As you can see, we have replaced all the `\\` with `.`. It looks more pleasant and saves you a few characters, making your lines easier to read. We have also replaced the base namespace with an `@`. Writing route callbacks has never been easier.

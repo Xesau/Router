@@ -37,7 +37,7 @@ And redirect all calls to inexistent files to /index.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . index.php [L,QSA]
 
-## Paramters
+## Paramteres
 You probably want to use parameters in your urls. An easy way to do this, is by getting the value of `$_GET` fields, but Xesau\Router provides another way of passing information through the URL.
 
 If the paramter type fails (for example, when visiting `www.site.com/page/abcdef` when the route is `/page/(\d+)`, which requires a number), the error handler will be called.

@@ -37,6 +37,40 @@ And redirect all calls to inexistent files to /index.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . index.php [L,QSA]
 
+## Paramters
+You probably want to use parameters in your urls. An easy way to do this, is by getting the value of `$_GET` fields, but Xesau\Router provides another way of passing information through the URL.
+
+If the paramter type fails (for example, when visiting `www.site.com/page/abcdef` when the route is `/page/(\d+)`, which requires a number), the error handler will be called.
+
+You can make a special error page this by by adding a 'catch-all' route *after* the correct route.
+
+```php
+<?php
+
+// ... init router ... //
+
+// Route has a numeric parameter, caught with (\d+)
+$router->get('/article/(\d+)', function($id) {
+    $article = Article::findById($id);
+    echo $article->content;
+});
+
+// Route has an 'everything' parameter for the username (caught with (.+), which is regex
+// for 'anything at least 1 character long', and a choice parameter for the page
+// (caught with (overview|friends|trophies), which means the parameter must be one of those
+$router->get('/profile/(.+)/(overview|friends|trophies)', function($username, $profilePage) {
+    // ... do something with $username and $profilePage ... //
+});
+
+// Error handler
+$router->get('/profile/.+/(.+)', function($page) {
+    echo $page .' is not a correct page on the user profile.';
+});
+
+?>
+```
+
+
 ## Special callback notation
 If you use class methods as callbacks for your routes, your route definitions can quickly come to look like this:
 ```php

@@ -37,7 +37,7 @@ And redirect all calls to inexistent files to /index.php
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . index.php [L,QSA]
 
-## Paramteres
+## Parameters
 You probably want to use parameters in your urls. An easy way to do this, is by getting the value of `$_GET` fields, but Xesau\Router provides another way of passing information through the URL.
 
 If the paramter type fails (for example, when visiting `www.site.com/page/abcdef` when the route is `/page/(\d+)`, which requires a number), the error handler will be called.
@@ -70,6 +70,19 @@ $router->get('/profile/.+/(.+)', function($page) {
 ?>
 ```
 
+### Throwing errors inside route handlers
+When a parameters turns out to be of an incorrect value, you can call the default error handler by throwing an HttpRequestException.
+
+```php
+<?php
+
+use Xesau\HttpRequestException;
+
+$router->get('/test', function() {
+    throw new HttpRequestException('Page not found', 404);
+});
+
+```
 
 ## Special callback notation
 If you use class methods as callbacks for your routes, your route definitions can quickly come to look like this:

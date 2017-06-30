@@ -12,6 +12,8 @@ use InvalidArgumentException;
  */
 class Router
 {
+    
+    const NO_ROUTE_FOUND_MSG = 'No route found';
 
     /**
      * @var array[][] $routes        The defined routes
@@ -29,7 +31,7 @@ class Router
     /**
      * Initiates the router and sets some default values
      *
-     * @param callable $error         The 404 Not Found handler
+     * @param callable $error         The error handler (string method, string path, int statusCode, Exception ex)
      * @param string   $baseNamespace The base namespace
      */
     public function __construct($error, $baseNamespace = '')
@@ -215,7 +217,7 @@ class Router
     {
         // If there are no routes for that method, just error immediately
         if (!isset($this->routes[$method])) {
-            return $this->call($this->error, [$method, $path, 404]);
+            return $this->call($this->error, [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]);
         } else {
             // Loop over all given routes
             foreach ($this->routes[$method] as $regex => $route) {
@@ -235,15 +237,16 @@ class Router
 
                     // Prevent @ collision
                     $regex = str_replace('@', '\\@', $regex);
-
+                    
                     // If the path matches the pattern
                     if (preg_match('@^' . $regex . '$@', $path, $params)) {
+
                         // Pass the params to the callback, without the full url
                         array_shift($params);
                         try {
                             return $this->call($callback, array_merge($service, $params));
                         } catch (HttpRequestException $ex) {
-                            return $this->call($this->error, [$method, $path, $ex->getCode()]);
+                            return $this->call($this->error, [$method, $path, $ex->getCode(), $ex]);
                         }
                     }
                 }
@@ -251,7 +254,7 @@ class Router
         }
 
         // Nothing found --> error handler
-        return $this->call($this->error, [$method, $path, 404]);
+        return $this->call($this->error, [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]);
     }
     
     /**

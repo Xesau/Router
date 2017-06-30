@@ -13,7 +13,7 @@ require_once 'vendor/Xesau/Router.php';
 
 use Xesau\Router;
 
-$router = new Router(function ($method, $path, $statusCode) {
+$router = new Router(function ($method, $path, $statusCode, $exception) {
     http_response_code($statusCode);
     include 'views/error.html';
 }); 

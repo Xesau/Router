@@ -217,7 +217,8 @@ class Router
     {
         // If there are no routes for that method, just error immediately
         if (!isset($this->routes[$method])) {
-            return $this->call($this->error, [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]);
+            return $this->call($this->error,
+                array_merge([$this->service], [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]));
         } else {
             // Loop over all given routes
             foreach ($this->routes[$method] as $regex => $route) {
@@ -244,7 +245,7 @@ class Router
                         // Pass the params to the callback, without the full url
                         array_shift($params);
                         try {
-                            return $this->call($callback, array_merge($service, $params));
+                            return $this->call($callback, array_merge([$service], $params));
                         } catch (HttpRequestException $ex) {
                             return $this->call($this->error, [$method, $path, $ex->getCode(), $ex]);
                         }
@@ -254,7 +255,8 @@ class Router
         }
 
         // Nothing found --> error handler
-        return $this->call($this->error, [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]);
+        return $this->call($this->error,
+            array_merge([$this->service], [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]));
     }
     
     /**

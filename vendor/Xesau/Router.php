@@ -26,7 +26,7 @@ class Router
     private $error;
     private $baseNamespace;
     private $currentPrefix;
-    private $service;
+    private $service = null;
     
     /**
      * Initiates the router and sets some default values
@@ -217,8 +217,8 @@ class Router
     {
         // If there are no routes for that method, just error immediately
         if (!isset($this->routes[$method])) {
-            return $this->call($this->error,
-                array_merge([$this->service], [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]));
+            $params = [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)];
+            return $this->call($this->error, $this->service == null ? $params : array_merge([$this->service], $params));
         } else {
             // Loop over all given routes
             foreach ($this->routes[$method] as $regex => $route) {
@@ -226,7 +226,7 @@ class Router
                 if ($len > 0) {
 					// Get route 
 					$callback = $route[0];
-					$service = isset($route[1]) ? $route[1] : [];
+					$service = isset($route[1]) ? $route[1] : null;
 					
                     // Fix missing begin-/
                     if ($regex[0] != '/')
@@ -245,9 +245,13 @@ class Router
                         // Pass the params to the callback, without the full url
                         array_shift($params);
                         try {
-                            return $this->call($callback, array_merge([$service], $params));
+                            return $this->call($callback, $service == null ? $params : array_merge([$service], $params));
                         } catch (HttpRequestException $ex) {
-                            return $this->call($this->error, [$method, $path, $ex->getCode(), $ex]);
+                            $params = [$method, $path, $ex->getCode(), $ex];
+                            return $this->call($this->error, $this->service == null ? $params : array_merge([$this->service], $params));
+                        } catch (Exception $ex) {
+                            $params = [$method, $path, 500, $ex];
+                            return $this->call($this->error, $this->service == null ? $params : array_merge([$this->service], $params));
                         }
                     }
                 }
@@ -291,7 +295,7 @@ class Router
         }
         
         // Call the callable
-		return call_user_func_array($callable, $params);
+        return call_user_func_array($callable, $params);
     }
 
     /**

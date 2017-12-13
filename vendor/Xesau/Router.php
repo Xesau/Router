@@ -260,7 +260,7 @@ class Router
 
         // Nothing found --> error handler
         return $this->call($this->error,
-            array_merge([$this->service], [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]));
+            array_merge($this->service == null ? [] : [$this->service], [$method, $path, 404, new HttpRequestException(self::NO_ROUTE_FOUND_MSG)]));
     }
     
     /**
